@@ -1,39 +1,54 @@
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 public class InputReader {
     public static void main(String[] args) {
-        String surname = "", firstName = "", middleName = "", dateOfBirth = "DD.MM.YYYY", phoneNumber = "89_________", sex = "M";
         try {
             Scanner scanner = new Scanner(System.in);
+            System.out.println("Enter user data (Last Name First Name Patronymic Date_of_Birth Phone_Number Gender):");
             String input = scanner.nextLine();
-            String[] inputArray = input.split(" ");
-            if (inputArray.length != 6) {
-                throw new Exception("Неверное количество параметров");
-            }
-            surname = inputArray[0];
-            firstName = inputArray[1];
-            middleName = inputArray[2];
-            dateOfBirth = inputArray[3];
-            phoneNumber = inputArray[4];
-            sex = inputArray[5];
+            String[] data = input.split(" ");
 
-            try {
-                File file = new File(surname + ".txt");
-                FileWriter writer = new FileWriter(file, true);
-                writer.write(String.format("%s %s %s %s %s %s%n", surname, firstName, middleName, dateOfBirth, phoneNumber, sex));
-                writer.close();
-                System.out.println("Данные субъекта ПДн с фамилией «" + surname + "» успешно записаны в файл «" + file.getName() + "».");
-            }
-            catch (IOException e) {
-                System.out.println("ОШИБКА при записи данных в файл. Подробнее: " + e.getMessage());
+            if (data.length != 6) {
+                throw new IllegalArgumentException("Incorrect number of data fields. Please provide Last Name, First Name, Patronymic, Date of Birth, Phone Number, and Gender separated by spaces.");
             }
 
-        }
-        catch (Exception somethingWentWrongException) {
-            System.out.println("ОШИБКА. " + somethingWentWrongException.getMessage());
+            String lastName = data[0];
+            String firstName = data[1];
+            String patronymic = data[2];
+            LocalDate dateOfBirth = LocalDate.parse(data[3], DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+            long phoneNumber = Long.parseUnsignedLong(data[4]);
+            String gender = data[5];
+
+//          System.out.println("User data saved to file: " + file.getName());
+//        } catch (IllegalArgumentException e) {
+//            System.out.println("Error: " + e.getMessage());
+//        } catch (DateTimeParseException e) {
+//            System.out.println("Error: Incorrect data format. Date should be in dd.mm.yyyy format, Phone Number should be an unsigned integer.");
+//        } catch (IOException e) {
+//            System.out.println("Error writing to file. Details: " + e.getMessage());
+
+            if (!gender.equalsIgnoreCase("f") && !gender.equalsIgnoreCase("m")) {
+                throw new IllegalArgumentException("Invalid gender. Please enter 'f' for female or 'm' for male.");
+            }
+
+            File file = new File(lastName + ".txt");
+            FileWriter writer = new FileWriter(file, true);
+            writer.write(String.format("%s %s %s %s %d %s%n", lastName, firstName, patronymic, dateOfBirth.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")), phoneNumber, gender));
+            writer.close();
+
+            System.out.println("User data saved to file: " + file.getName());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
+        } catch (DateTimeParseException e) {
+            System.out.println("Error: Incorrect data format. Date should be in dd.mm.yyyy format, Phone Number should be an unsigned integer.");
+        } catch (IOException e) {
+            System.out.println("Error writing to file. Details: " + e.getMessage());
         }
     }
 }
